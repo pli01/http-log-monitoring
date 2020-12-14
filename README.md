@@ -18,3 +18,39 @@ Example log lines:
 * Whenever the total traffic drops again below that value on average for the past 2 minutes, print or display another message detailing when the alert recovered
 * Write a test for the alerting logic
 * Explain how you’d improve on this application design
+
+# Usage
+```
+# ./http-log-monitoring.py -h
+usage: http-log-monitoring.py [-h] [-f [http log files]] [-t threshold]
+
+HTTP log monitoring console program
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f [http log files], --filename [http log files]
+                        http log file
+  -t threshold, --threshold threshold
+                        threshold used by 2 minutes alarms
+
+```
+
+## Test it
+To test it : launch 2 shells; one to generate log file and second, monitoring log file
+```
+# create empty log file
+touch access_log_generated.log
+# generate 500 logs in access_log_generated.log
+./generate-logs.py
+# generate 500 logs every 10s
+while true; do
+./generate-logs.py
+sleep 10
+done
+```
+
+```
+./http-log-monitoring.py -f access_log_generated.log
+[...stats...alarm...]
+```
+
