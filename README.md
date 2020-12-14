@@ -36,17 +36,12 @@ optional arguments:
 ```
 
 ## Test it
-To test it : launch 2 shells; one to generate log file and second, monitoring log file
+To test it : launch 2 shells
+ * one to generate log file
+ * and second, monitoring log file
 ```
-# create empty log file
-touch access_log_generated.log
-# generate 500 logs in access_log_generated.log
-./generate-logs.py
-# generate 500 logs every 10s
-while true; do
-./generate-logs.py
-sleep 10
-done
+# example: generate access_log_generated.log with 50 req/s during 10 seconds
+./generate-logs.py  -f access_log_generated.log -t 50 -d 10
 ```
 
 ```

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import re
 import datetime
-import time, os
+import time, os, sys
 from collections import Counter
 import argparse
 
@@ -12,20 +12,20 @@ Default parameters:
 """
 # TODO: override parameters via config file or args
 STATS_INTERVAL   = 10
-ALERT_INTERVAL   = 30
+ALERT_INTERVAL   = 120
 
-def display_summary_stats(result, stats_data):
+def display_summary_stats(stats_data):
     """
     Display summary statistics
+       section, host, authuser, status, request_method
     """
-    total = sum(result)
-    count = len(result)
-    average = total / count
-    print("Summary stats last {count} seconds: {total} req / {count} seconds - {average}/s".format(total=total,count=count,average=average))
     if len(stats_data):
        for k in [ 'section', 'host', 'authuser', 'status', 'request_method' ]:
-           for x in Counter(stats_data[k]).most_common(5):
+           for x in Counter(stats_data[k]).most_common(3):
                print('     {title} {key} : {count} times'.format(title=k,key=x[0], count=x[1]))
+
+def display_time(time):
+    return datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d %H:%M:%S')
 
 def parse_clf_http_line(line,stats_data):
     """
@@ -64,7 +64,7 @@ def parse_clf_http_line(line,stats_data):
     if path_components[1]:
         section = section + path_components[1]
 
-    # nested dict
+    # store nested dict
     entry = [ ("section", section ), ("host", host), ("authuser", authuser), ("request_method", request_method) , ("status", status) ]
     for key, value in entry:
        if key in stats_data and value in stats_data[key]:
@@ -72,77 +72,65 @@ def parse_clf_http_line(line,stats_data):
        elif key in stats_data:
           stats_data[key][value] = 1
        else:
-          stats_data[key] = { value:  1}
+          stats_data[key] = { value:  1 }
 
 def main(filename,threshold):
-    """
-    Read log file, display stats, and alert
-    """
-    # TODO: parse args
-    # TODO: catch error
-
-    stats_result = []
-    alert_result = []
-    alert_generated = 0
     total_req_count = 0
-    stat_count = 0
-    alert_count = 0
+    alarm_total_req_count = 0
+    alert = False
     stats_data = {}
 
+    now = time.time()
+    statsTime = now + STATS_INTERVAL
+    alertTime = now + ALERT_INTERVAL
+
     # open the file for reading and shift at the end of file
-    file = open(filename, 'r')
+    try:
+        file = open(filename, 'r')
+    except IOError:
+         print('Unable to open {filename} for reading'.format(filename=filename))
+         sys.exit(1)
+
     file.seek(0, os.SEEK_END)
 
     while True:
-        # read a single line
+        now = time.time()
         pos = file.tell()
         line = file.readline()
-        if not line:
-            # store req / s
-            # print("#", total_req_count, stat_count, alert_count, stats_result)
-            stats_result.append(total_req_count)
-            total_req_count=0
-            stat_count += 1
-
-            if stat_count == STATS_INTERVAL:
-               display_summary_stats(stats_result, stats_data)
-               alert_count += stat_count
-               stat_count = 0
-               stats_data = {}
-               alert_result.extend(stats_result)
-               stats_result.clear()
-
-            if alert_count == ALERT_INTERVAL:
-               now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-               average = 0
-               if len(alert_result):
-                  average = int(sum(alert_result) / len(alert_result))
-               if average > threshold and not alert_generated:
-                  print("High traffic generated an alert - hits = {value}, triggered at {time}".format(value=average,time=now))
-                  alert_generated += 1
-               elif alert_generated > 0:
-                  print("Traffic back to normal - hits = {value}, recovered at {time}".format(value=average,time=now))
-                  alert_generated = 0
-
-               # reset
-               alert_count = 0
-               alert_result.clear()
-
-            time.sleep(1)
-            file.seek(pos)
-
+        if line:
+            parse_clf_http_line(line,stats_data)
+            total_req_count += 1
+            alarm_total_req_count += 1
         else:
-          parse_clf_http_line(line,stats_data)
-          total_req_count += 1
+            file.seek(pos)
+        if now >= statsTime:
+            average = total_req_count / STATS_INTERVAL
+            print("{time} Summary stats last {count} seconds: {total} req / {count} seconds - {average}/s - {alert_average}/s".format(time=display_time(now), total=total_req_count,count=STATS_INTERVAL,average=average, alert_average=(alarm_total_req_count/ ALERT_INTERVAL)))
+            display_summary_stats(stats_data)
+            total_req_count = 0
+            stats_data = {}
+            now = time.time()
+            statsTime = now + STATS_INTERVAL
+        if now >= alertTime:
+            average = alarm_total_req_count/ALERT_INTERVAL
+            if not alert and average >= threshold:
+                print("High traffic generated an alert - hits = {value}, triggered at {time}".format(value=average,time=display_time(now)))
+                alert = True
+            elif alert and average < threshold:
+                print("Traffic back to normal - hits = {value}, recovered at {time}".format(value=average,time=display_time(now)))
+                alert = False
+            alarm_total_req_count = 0
+            now = time.time()
+            alertTime = now + ALERT_INTERVAL
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='HTTP log monitoring console program')
-    parser.add_argument('-f', '--filename', metavar='http log files', nargs='?', default = '/tmp/access.log', help='http log file')
-    parser.add_argument('-t', '--threshold', metavar='threshold', type=int, default = 10, help='threshold used by 2 minutes alarms')
+    parser.add_argument('-f', '--filename', metavar='http log files', nargs='?', default = '/tmp/access.log', help='http log file (default: /tmp/access.log)')
+    parser.add_argument('-t', '--threshold', metavar='threshold', type=int, default = 10, help='threshold used by 2 minutes alarms (default: 10)')
     args = parser.parse_args()
 
     try:
-        print(__file__, "watch file",args.filename)
+        print("{progname} watch log file {filename}".format(progname=__file__,filename=args.filename))
         main(args.filename, args.threshold)
     except KeyboardInterrupt:
-        print(__file__, "stopped")
+        print("{progname} stopped".format(progname=__file__))
