@@ -25,15 +25,15 @@ def generate_log_line():
     return '{} - {} [{}] "{} {} HTTP/1.0" {} {}\n'.format( ip,user,timestamp, method, uri, status, size )
 
 def main(filename,threshold,duration):
-    print('Append {} random log line during {} in {} '.format(threshold, duration, filename))
+    print('Append {} random log line per second during {} seconds in {} '.format(threshold, duration, filename))
 
     f = open(filename,'a')
 
     for t in range(0,duration):
         for i in range(0,threshold):
             f.write(generate_log_line())
+        print(time.time(),"write",threshold,"/s", t)
         f.flush()
-        print(time.time(),"write",threshold,"/s")
         time.sleep(1)
 
 if __name__ == '__main__':

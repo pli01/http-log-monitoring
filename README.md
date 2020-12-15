@@ -31,11 +31,11 @@ optional arguments:
   -f [http log files], --filename [http log files]
                         http log file (default: /tmp/access.log)
   -s stats, --stats stats
-                        statistics interval (default: 10s)
+                        statistics interval in second (default: 10)
   -t threshold, --threshold threshold
-                        threshold used by 2 minutes alarms (default: 10 req/s)
+                        threshold used by alarms in request/s (default: 10)
   -a alarm, --alarm alarm
-                        alarm interval (default: 180s)
+                        alarm interval in second (default: 180)
 ```
 
 ## Test it

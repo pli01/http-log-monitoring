@@ -5,12 +5,15 @@ import time, os, sys
 from collections import Counter
 import argparse
 
-def alarm_threshold(now,alarm_total_req_count,threshold,ALERT_INTERVAL,alert):
+def f_average(lst):
+    return round( sum(lst) / len(lst) , 2)
+
+def alarm_threshold(now,alarm_interval,threshold,alert):
     """
     Alarm threshold: Display alert when total traffic for the past X minutes exceeds a certain number on average (threshold req/s)
       return True|False
     """
-    average = alarm_total_req_count/ALERT_INTERVAL
+    average = f_average(alarm_interval)
     if not alert and average >= threshold:
        print("High traffic generated an alert - hits = {value}, triggered at {time}".format(value=average,time=display_time(now)))
        alert = True
@@ -19,12 +22,14 @@ def alarm_threshold(now,alarm_total_req_count,threshold,ALERT_INTERVAL,alert):
        alert = False
     return alert
 
-def display_stats(now,total_req_count, STATS_INTERVAL, stats_data, alarm_total_req_count, ALERT_INTERVAL):
+def display_stats(now,stats_interval, stats_data):
     """
     Display stats about the traffic during X s
     """
-    average = total_req_count / STATS_INTERVAL
-    print("{time} Summary stats last {count} seconds: {total} req / {count} seconds - {average}/s - {alert_average}/s".format(time=display_time(now), total=total_req_count,count=STATS_INTERVAL,average=average, alert_average=(alarm_total_req_count/ ALERT_INTERVAL)))
+    total = sum(stats_interval)
+    count = len(stats_interval)
+    average = f_average(stats_interval)
+    print("{time} Summary stats last {count} seconds: hits = {total} - average = {average}/s".format(time=display_time(now), total=total,count=count,average=average))
     display_summary_stats(stats_data)
 
 def display_summary_stats(stats_data):
@@ -37,8 +42,8 @@ def display_summary_stats(stats_data):
        for k in [ 'section', 'host', 'authuser', 'status', 'request_method' ]:
            count = []
            for x in Counter(stats_data[k]).most_common(3):
-               count.append('{key} ({count} times)'.format(key=x[0], count=x[1]))
-           string += '{title}: {count}\n'.format(title=k, count=', '.join(count))
+               count.append('{key} = {count}'.format(key=x[0], count=x[1]))
+           string += '  {title} hits: {count}\n'.format(title=k, count=', '.join(count))
        print(string)
 
 def display_time(time):
@@ -99,13 +104,12 @@ def main(filename,stats,threshold,alarm):
     STATS_INTERVAL = stats
     ALERT_INTERVAL = alarm
     total_req_count = 0
-    alarm_total_req_count = 0
+    stats_interval = []
+    alarm_interval = []
     alert = False
     stats_data = {}
 
     now = time.time()
-    statsTime = now + STATS_INTERVAL
-    alertTime = now + ALERT_INTERVAL
 
     # open the file for reading
     try:
@@ -123,29 +127,33 @@ def main(filename,stats,threshold,alarm):
         if line:
             parse_clf_http_line(line,stats_data)
             total_req_count += 1
-            alarm_total_req_count += 1
         else:
             file.seek(pos)
-        if now >= statsTime:
-            display_stats(now,total_req_count, STATS_INTERVAL, stats_data, alarm_total_req_count, ALERT_INTERVAL)
+            time.sleep(1)
+
+            stats_interval.append(total_req_count)
             total_req_count = 0
-            stats_data = {}
-            statsTime = now + STATS_INTERVAL
-        if now >= alertTime:
-            alert = alarm_threshold(now,alarm_total_req_count,threshold,ALERT_INTERVAL,alert)
-            alarm_total_req_count = 0
-            alertTime = now + ALERT_INTERVAL
+
+            if len(stats_interval) == STATS_INTERVAL:
+                display_stats(now,stats_interval, stats_data)
+                alarm_interval.append(sum(stats_interval))
+                stats_data = {}
+                stats_interval.clear()
+
+            if len(alarm_interval) == (ALERT_INTERVAL/STATS_INTERVAL):
+                alert = alarm_threshold(now,alarm_interval,threshold,alert)
+                alarm_interval.clear()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='HTTP log monitoring console program')
     parser.add_argument('-f', '--filename', metavar='http log files', nargs='?', default = '/tmp/access.log', help='http log file (default: /tmp/access.log)')
-    parser.add_argument('-s', '--stats', metavar='stats', type=int, default = 10, help='statistics interval (default: 10s)')
-    parser.add_argument('-t', '--threshold', metavar='threshold', type=int, default = 10, help='threshold used by 2 minutes alarms (default: 10 req/s)')
-    parser.add_argument('-a', '--alarm', metavar='alarm', type=int, default = 180, help='alarm interval (default: 180s)')
+    parser.add_argument('-s', '--stats', metavar='stats', type=int, default = 10, help='statistics interval in second (default: 10)')
+    parser.add_argument('-t', '--threshold', metavar='threshold', type=int, default = 10, help='threshold used by alarms in request/s (default: 10)')
+    parser.add_argument('-a', '--alarm', metavar='alarm', type=int, default = 180, help='alarm interval in second (default: 180)')
     args = parser.parse_args()
 
     try:
-        print("{progname} watch log file {filename}".format(progname=__file__,filename=args.filename))
+        print("Starting {progname} reading log file {filename}".format(progname=__file__,filename=args.filename))
         main(args.filename, args.stats, args.threshold, args.alarm)
     except KeyboardInterrupt:
         print("{progname} stopped".format(progname=__file__))
