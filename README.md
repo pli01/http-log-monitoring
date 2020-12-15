@@ -39,16 +39,14 @@ optional arguments:
 ```
 
 ## Test it
-To test it : launch 2 shells
- * one to generate log file
- * and second, monitoring log file
+Tested Linux ad OS/X
+
+* To test in docker with python:3 image
 ```
-# example: generate access_log_generated.log with 50 req/s during 10 seconds
-./generate-logs.py  -f access_log_generated.log -t 50 -d 10
+make docker-build
 ```
 
+* Or in a shell
 ```
-./http-log-monitoring.py -f access_log_generated.log
-[...stats...alarm...]
+make test
 ```
-

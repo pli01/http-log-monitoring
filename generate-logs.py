@@ -32,7 +32,7 @@ def main(filename,threshold,duration):
     for t in range(0,duration):
         for i in range(0,threshold):
             f.write(generate_log_line())
-        print(time.time(),"write",threshold,"/s", t)
+        print(time.time(),"write",threshold," req/s", t)
         f.flush()
         time.sleep(1)
 
