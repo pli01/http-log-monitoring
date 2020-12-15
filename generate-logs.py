@@ -4,7 +4,7 @@ from datetime import datetime, tzinfo, timedelta
 import random
 import argparse
 
-def main(filename,threshold,duration):
+def generate_log_line():
     ips         = [ "127.0.0.1","10.1.1.1","192.168.1.1" ]
     users       = [ "james","jill","frank","mary" ]
     resources   = [ "/report","/api/user", "/" ]
@@ -13,23 +13,27 @@ def main(filename,threshold,duration):
 
     otime = datetime(2020,12,12)
 
-    print('Append {} random logs in {} '.format(threshold, filename))
+    increment = timedelta(seconds=random.randint(30,300))
+    otime += increment
+    timestamp = otime.strftime('%d/%b/%Y:%H:%M:%S')+' +0000'
+    ip = random.choice(ips)
+    user = random.choice(users)
+    method = random.choice(methods)
+    uri = random.choice(resources)
+    status = random.choice(status_code)
+    size = str(random.randrange(2000,5000))
+    return '{} - {} [{}] "{} {} HTTP/1.0" {} {}\n'.format( ip,user,timestamp, method, uri, status, size )
+
+def main(filename,threshold,duration):
+    print('Append {} random log line during {} in {} '.format(threshold, duration, filename))
 
     f = open(filename,'a')
 
     for t in range(0,duration):
         for i in range(0,threshold):
-            increment = timedelta(seconds=random.randint(30,300))
-            otime += increment
-            timestamp = otime.strftime('%d/%b/%Y:%H:%M:%S')+' +0000'
-            ip = random.choice(ips)
-            user = random.choice(users)
-            method = random.choice(methods)
-            uri = random.choice(resources)
-            status = random.choice(status_code)
-            size = str(random.randrange(2000,5000))
-            f.write('{} - {} [{}] "{} {} HTTP/1.0" {} {}\n'.format( ip,user,timestamp, method, uri, status, size ))
-            f.flush()
+            f.write(generate_log_line())
+        f.flush()
+        print(time.time(),"write",threshold,"/s")
         time.sleep(1)
 
 if __name__ == '__main__':

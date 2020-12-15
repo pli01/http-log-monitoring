@@ -21,18 +21,21 @@ Example log lines:
 
 # Usage
 ```
-# ./http-log-monitoring.py -h
-usage: http-log-monitoring.py [-h] [-f [http log files]] [-t threshold]
+usage: http-log-monitoring.py [-h] [-f [http log files]] [-s stats]
+                              [-t threshold] [-a alarm]
 
 HTTP log monitoring console program
 
 optional arguments:
   -h, --help            show this help message and exit
   -f [http log files], --filename [http log files]
-                        http log file
+                        http log file (default: /tmp/access.log)
+  -s stats, --stats stats
+                        statistics interval (default: 10s)
   -t threshold, --threshold threshold
-                        threshold used by 2 minutes alarms
-
+                        threshold used by 2 minutes alarms (default: 10 req/s)
+  -a alarm, --alarm alarm
+                        alarm interval (default: 180s)
 ```
 
 ## Test it
