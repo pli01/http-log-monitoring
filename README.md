@@ -19,6 +19,8 @@ Example log lines:
 * Write a test for the alerting logic
 * Explain how you’d improve on this application design
 
+
+
 # Usage
 ```
 usage: http-log-monitoring.py [-h] [-f [http log files]] [-s stats]
@@ -39,6 +41,8 @@ optional arguments:
 ```
 
 ## Test it
+[![Build status](https://github.com/pli01/http-log-monitoring/workflows/CI/badge.svg)](https://github.com/pli01/http-log-monitoring)
+
 Tested Linux ad OS/X
 
 * To test in docker with python:3 image
