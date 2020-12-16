@@ -67,19 +67,19 @@ ${bindir}/$http_log_monitoring -f $logfile -a $alert_time  2>&1 >$test_output &
 monitoring_pid=$!
 
 # test 1
-test_match="Summary stats last 10 seconds"
+test_match='Summary stats last 10 seconds'
 run_test "1" "$test_match" "$test_output" 
 
 # test 2
-test_match="  section hits:"
+test_match='total "sections" of the web site'
 run_test "2" "$test_match" "$test_output" 
 
 # test 3
-test_match="^High traffic generated an alert"
+test_match='^High traffic generated an alert'
 run_test "3" "$test_match" "$test_output" 
 
 # test 2
-test_match="^Traffic back to normal"
+test_match='^Traffic back to normal'
 run_test "4" "$test_match" "$test_output" 
 
 exit 0
