@@ -1,0 +1,29 @@
+# development mode
+version: '3.5'
+services:
+  http-log-monitoring:
+    image: http-log-monitoring:latest
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${http_proxy}
+        no_proxy: ${no_proxy}
+#    volumes:
+#      - ./http-log-monitoring.py:/app/http-log-monitoring.py
+#      - ./generate-logs.py:/app/generate-logs.py
+#      - notused:/app/modules
+#    env_file:
+#      - ${cnf:-.env}
+#    networks:
+#      - log-network
+
+#networks:
+#  log-network:
+#    name: log-network
+#    driver: bridge
+#    driver_opts:
+#      com.docker.network.driver.mtu: 1450
+#volumes:
+#  notused:
