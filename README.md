@@ -43,7 +43,7 @@ optional arguments:
 ## Test it
 [![Build status](https://github.com/pli01/http-log-monitoring/workflows/CI/badge.svg)](https://github.com/pli01/http-log-monitoring)
 
-Tested Linux ad OS/X
+Tested on Linux and OS/X
 
 * To test in docker with python:3 image
 ```
