@@ -57,6 +57,7 @@ Start the log generator to send X req during 20s in logfile, start the http-moni
 - Detect "Traffic back to normal"
 Test script is defined in `tests` directory.
 
+## Development environment
 * (optional) A docker test stack is also provided, to launch the test in docker with docker-compose with python:3 image at docker build time
 ```
 make docker-build
@@ -72,4 +73,6 @@ make docker-run-test
 - You can "curl 127.0.0.1" or use any benchmark tool (ab,hey,locust) to send requests on http://127.0.0.1 and see the result in docker container logs output
 ```
 make docker-stack-run
+#
+ab -n 10 -t 1 http://127.0.0.1
 ```
