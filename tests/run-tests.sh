@@ -18,7 +18,7 @@ function run_test() {
     test_result=1
     echo "# Test $n: Waiting $timeout seconds to find '$test_match' in $test_output"
     until [ "$timeout" -le 0 -o "$test_result" -eq "0" ] ; do
-       grep "$test_match" $test_output
+       test -f $test_output && grep "$test_match" $test_output
        test_result=$?
        if [ "$test_result" -eq "0" ]; then
           break

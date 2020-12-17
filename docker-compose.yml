@@ -1,6 +1,18 @@
 # development mode
 version: '3.5'
 services:
+  web:
+    image: nginx:stable
+    ports:
+      - "${WEB_PORT:-80}:80"
+    networks:
+      - log-network
+    links:
+      - http-log-monitoring
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - log-volume:/logs
+
   http-log-monitoring:
     image: http-log-monitoring:latest
     build:
@@ -10,7 +22,11 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${http_proxy}
         no_proxy: ${no_proxy}
-#    volumes:
+#     entrypoint: [ "/bin/bash","-c","/app/http-log-monitoring.py -f /logs/host.access.log -a 30" ]
+#    entrypoint: [ "sleep", "100" ]
+    restart: always
+    volumes:
+      - log-volume:/logs
 #      - ./http-log-monitoring.py:/app/http-log-monitoring.py
 #      - ./generate-logs.py:/app/generate-logs.py
 #      - notused:/app/modules
@@ -19,11 +35,11 @@ services:
 #    networks:
 #      - log-network
 
-#networks:
-#  log-network:
-#    name: log-network
-#    driver: bridge
-#    driver_opts:
-#      com.docker.network.driver.mtu: 1450
-#volumes:
-#  notused:
+networks:
+  log-network:
+    name: log-network
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+volumes:
+    log-volume: 

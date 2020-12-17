@@ -8,7 +8,7 @@
 * testing prog to simulate alerting
 * First quick implementation with simple tail loop with 1s sleep interval (bloking io)
 
-data structure to store 10s of traffic information
+data structure to store 10s of traffic information as counters
 {
   'section': Counter({'/': 215, '/report': 193, '/api': 192}),
   'authuser': Counter({'jill': 157, 'james': 157, 'mary': 150, 'frank': 136}),
@@ -20,9 +20,11 @@ data structure to store 10s of traffic information
 
 # Improvements
 * clean daemonize
+* use config file, or env parameters
+* catch regex error if logfile in not in CLF format 
 * Add try/catch error cleanly
-* logging and formating function
-* follow rotating logs
+* logging and formating function or sending status into a remote collector in a json format
+* follow rotating logfile
 * Use non blocking IO, poll, event modification and stream, Loop based on event modification (select, poll)
 * Time series: circular queue per second: 1s -> 10s -> 120s (2mn) to store timestamp, and data to enhanced statistics
 * multi thread and queue

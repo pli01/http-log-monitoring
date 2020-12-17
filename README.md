@@ -44,13 +44,32 @@ optional arguments:
 [![Build status](https://github.com/pli01/http-log-monitoring/workflows/CI/badge.svg)](https://github.com/pli01/http-log-monitoring)
 
 Tested on Linux and OS/X
+* in a shell, in the current directory, make test
+```
+make test
+```
 
-* To test in docker with python:3 image
+Test logic is the following:
+Start the log generator to send X req during 20s in logfile, start the http-monitoring-tool and detect the following cases in output
+- Detect "Summary stats last 10 seconds"
+- Detect "total "sections" of the web site"
+- Detect "High traffic generated an alert"
+- Detect "Traffic back to normal"
+Test script is defined in `tests` directory.
+
+* (optional) A docker test stack is also provided, to launch the test in docker with docker-compose with python:3 image at docker build time
 ```
 make docker-build
 ```
-
-* Or in a shell
+* (optionnal) Or to launch the test in docker with docker-compose with python:3 image at docker run time with a previous image built
 ```
-make test
+make docker-run-test
+```
+
+(optional): additional test stack, a docker test stack is provided, including:
+- One `web` nginx container listen on 80 port and send logs in CLF format into a shared volume /logs/hosts.access.log
+- One `http-log-monitoring` container is started and monitor the log file  /logs/hosts.access.log
+- You can "curl 127.0.0.1" or use any benchmark tool (ab,hey,locust) to send requests on http://127.0.0.1 and see the result in docker container logs output
+```
+make docker-stack-run
 ```
