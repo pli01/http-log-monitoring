@@ -1,7 +1,7 @@
 test:
 	( cd tests && bash run-tests.sh )
 docker-build:
-	docker-compose build  http-log-monitoring
+	docker-compose build --force-rm http-log-monitoring
 docker-run-test:
 	docker-compose run --rm -T --entrypoint /bin/bash  http-log-monitoring -c 'make test'
 	docker-compose down -v || true

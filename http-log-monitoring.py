@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+   Read log file "filename" , display stats at regular interval, and display alert when threshold is exceeded
+"""
+
 import re
 import datetime
 import time
@@ -8,15 +13,18 @@ from collections import Counter
 import argparse
 
 
-def f_average(elt, count):
+def r_average(elt, count):
+    """
+    Return rounded average
+    """
     return round(elt / count, 1)
 
 
 def alarm_threshold(now, alarm_total_req_count, alert_interval, threshold, alert_sent):
     """
-    Alarm threshold: Display alert when total traffic for the past X minutes exceeds a certain number on average (threshold req/s)
+    Display alert when total traffic for the past X minutes exceeds a certain number on average (threshold req/s)
     """
-    average = f_average(alarm_total_req_count, alert_interval)
+    average = r_average(alarm_total_req_count, alert_interval)
     if average >= threshold and not alert_sent:
         print("High traffic generated an alert - hits = {value}, triggered at {time}".format(
             value=average, time=display_time(now)))
@@ -35,28 +43,30 @@ def display_summary_stats(now, stats_interval, stats_data):
     total_req_count = 0
     size_bytes = 0
     summary = ""
-    if len(stats_data):
+    if len(stats_data) > 0:
         count = []
         summary = "\n"
         total_req_count = sum(Counter(stats_data['section']).values())
         size_bytes = sum(Counter(stats_data['size'].values()))
 
-        for x in Counter(stats_data['section']).most_common(3):
-            count.append('{key} = {count}'.format(key=x[0], count=x[1]))
-        n = len(Counter(stats_data['section']))
-        summary += '  total "sections" of the web site = {n} , most hits: {count}'.format(
-            n=n, count=', '.join(count))
+        for element in Counter(stats_data['section']).most_common(3):
+            count.append('{key} = {count}'.format(
+                key=element[0], count=element[1]))
+        number = len(Counter(stats_data['section']))
+        summary += '  total "sections" of the web site = {number} , most hits: {count}'.format(
+            number=number, count=', '.join(count))
 
-        for k in ['host', 'authuser', 'status', 'request_method']:
+        for field in ['host', 'authuser', 'status', 'request_method']:
             count = []
             summary += '\n'
-            for x in Counter(stats_data[k]).most_common(3):
-                count.append('"{key}" = {count}'.format(key=x[0], count=x[1]))
-            l = len(Counter(stats_data[k]))
-            summary += '  most common of {l} "{title}" : {count}'.format(
-                title=k, l=l, count=', '.join(count))
+            for element in Counter(stats_data[field]).most_common(3):
+                count.append('"{key}" = {count}'.format(
+                    key=element[0], count=element[1]))
+            number = len(Counter(stats_data[field]))
+            summary += '  most common of {number} "{title}" : {count}'.format(
+                title=field, number=number, count=', '.join(count))
 
-    average = f_average(total_req_count, stats_interval)
+    average = r_average(total_req_count, stats_interval)
 
     string = "{time} Summary stats last {count} seconds: hits = {total} - average = {average}/s - size = {size_bytes} bytes".format(
         time=display_time(now), total=total_req_count, count=stats_interval, average=average, size_bytes=size_bytes)
@@ -64,11 +74,11 @@ def display_summary_stats(now, stats_interval, stats_data):
     print(string + summary)
 
 
-def display_time(time):
+def display_time(timestamp):
     """
-    Format display time
+    Return formatted display timestamp
     """
-    return datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
 
 def parse_clf_http_line(line, stats_data):
@@ -77,10 +87,9 @@ def parse_clf_http_line(line, stats_data):
     example:
       127.0.0.1 user-identifier frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
     use Regex to split in
-      host ident authuser date "request" status size
-        with "request" as "method path request_version"
 
-    Generate a dictionary from the CLF log line
+    Returns:
+       Generate a dictionary from the CLF log line
     """
     # TODO: catch AttributeError exception if error
     pattern = re.compile(
