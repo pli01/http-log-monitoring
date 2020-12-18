@@ -44,12 +44,12 @@ export PYTHONUNBUFFERED=1
 
 dirname=$(dirname $0)
 bindir=..
-timestamp=$(date "+%Y-%m-%d-%H:%M:%S")
+timestamp="$(date "+%Y-%m-%d-%H:%M:%S")"
 
-generate_logs=generate-logs.py
-http_log_monitoring=http-log-monitoring.py
-logfile=${dirname}/access_log_generated_${timestamp}.log
-test_output=${dirname}/test_output_${timestamp}.log
+generate_logs="generate-logs.py"
+http_log_monitoring="http-log-monitoring.py"
+logfile="${dirname}/access_log_generated_${timestamp}.log"
+test_output="${dirname}/test_output_${timestamp}.log"
 
 # setup test
 echo "# setup test"
