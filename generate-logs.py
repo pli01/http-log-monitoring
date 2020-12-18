@@ -3,10 +3,10 @@
 """
    Write into "filename", "threshold" random log lines per second during "duration" second
 """
+import argparse
+import random
 import time
 from datetime import datetime, timedelta
-import random
-import argparse
 
 
 def generate_log_line():
@@ -14,17 +14,17 @@ def generate_log_line():
     Return one random log string in CLF format
     """
 
-    hosts = ["127.0.0.1", "10.1.1.1", "192.168.1.1"]
-    users = ["james", "jill", "frank", "mary"]
-    resources = ["/report", "/api/user", "/"]
-    methods = ["GET", "POST", "PUT"]
+    hosts = ['127.0.0.1', '10.1.1.1', '192.168.1.1']
+    users = ['james', 'jill', 'frank', 'mary']
+    resources = ['/report', '/api/user', '/']
+    methods = ['GET', 'POST', 'PUT']
     status_code = [200, 503, 302, 404]
 
     otime = datetime(2020, 12, 12)
 
     increment = timedelta(seconds=random.randint(30, 300))
     otime += increment
-    timestamp = otime.strftime('%d/%b/%Y:%H:%M:%S')+' +0000'
+    timestamp = otime.strftime('%d/%b/%Y:%H:%M:%S') + ' +0000'
     host = random.choice(hosts)
     user = random.choice(users)
     method = random.choice(methods)
@@ -35,7 +35,7 @@ def generate_log_line():
 
 
 def main(filename, threshold, duration):
-    print('Append {} random log line per second during {} seconds in {} '.format(
+    print('Append {} random log line per second during {} seconds in {}'.format(
         threshold, duration, filename))
 
     file = open(filename, 'a')
@@ -43,7 +43,7 @@ def main(filename, threshold, duration):
     for total_time in range(0, duration):
         for _ in range(0, threshold):
             file.write(generate_log_line())
-        print("{} {}/{}s write {} req/s".format(datetime.now()
+        print('{} {}/{}s write {} req/s'.format(datetime.now()
                                                 .strftime('%Y-%m-%d %H:%M:%S'), total_time, duration, threshold))
         file.flush()
         time.sleep(1)
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     try:
-        print(__file__, "generate log in file", args.filename)
+        print(__file__, 'generate log in file', args.filename)
         main(args.filename, args.threshold, args.duration)
     except KeyboardInterrupt:
-        print(__file__, "stopped")
+        print(__file__, 'stopped')

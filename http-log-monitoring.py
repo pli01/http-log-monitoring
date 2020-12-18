@@ -4,13 +4,13 @@
    Read log file "filename" , display stats at regular interval, and display alert when threshold is exceeded
 """
 
-import re
-import datetime
-import time
-import os
-import sys
-from collections import Counter
 import argparse
+import datetime
+import os
+import re
+import sys
+import time
+from collections import Counter
 
 
 def r_average(elt, count):
@@ -26,11 +26,11 @@ def alarm_threshold(now, alarm_total_req_count, alert_interval, threshold, alert
     """
     average = r_average(alarm_total_req_count, alert_interval)
     if average >= threshold and not alert_sent:
-        print("High traffic generated an alert - hits = {value}, triggered at {time}".format(
+        print('High traffic generated an alert - hits = {value}, triggered at {time}'.format(
             value=average, time=display_time(now)))
         alert_sent = True
     elif average < threshold and alert_sent:
-        print("Traffic back to normal - hits = {value}, recovered at {time}".format(
+        print('Traffic back to normal - hits = {value}, recovered at {time}'.format(
             value=average, time=display_time(now)))
         alert_sent = False
     return alert_sent
@@ -42,10 +42,10 @@ def display_summary_stats(now, stats_interval, stats_data):
     """
     total_req_count = 0
     size_bytes = 0
-    summary = ""
+    summary = ''
     if len(stats_data) > 0:
         count = []
-        summary = "\n"
+        summary = '\n'
         total_req_count = sum(Counter(stats_data['section']).values())
         size_bytes = sum(Counter(stats_data['size'].values()))
 
@@ -68,8 +68,10 @@ def display_summary_stats(now, stats_interval, stats_data):
 
     average = r_average(total_req_count, stats_interval)
 
-    string = "{time} Summary stats last {count} seconds: hits = {total} - average = {average}/s - size = {size_bytes} bytes".format(
-        time=display_time(now), total=total_req_count, count=stats_interval, average=average, size_bytes=size_bytes)
+    string = '{time} Summary stats last {count} seconds:' \
+             'hits = {total} - average = {average}/s - size = {size_bytes} bytes'.format(
+                 time=display_time(now), count=stats_interval, total=total_req_count, average=average,
+                 size_bytes=size_bytes)
 
     print(string + summary)
 
@@ -91,43 +93,42 @@ def parse_clf_http_line(line, stats_data):
     Returns:
        Generate a dictionary from the CLF log line
     """
-    # TODO: catch AttributeError exception if error
     pattern = re.compile(
-        r'^(?P<host>\S*)'             # host
-        r' (?P<ident>\S*)'            # ident
-        r' (?P<authuser>\S*)'         # authuser
-        r' \[(?P<date>.*?)\]'         # date
+        r'^(?P<host>\S*)'  # host
+        r' (?P<ident>\S*)'  # ident
+        r' (?P<authuser>\S*)'  # authuser
+        r' \[(?P<date>.*?)\]'  # date
         r' \"(?P<request_method>.*?)'  # request_method
-        r' (?P<path>.*?)'             # path
+        r' (?P<path>.*?)'  # path
         r'(?P<request_version> HTTP/.*)?\"'  # request_version
-        r' (?P<status>\d*)'           # status
-        r' (?P<size>\d*)$'            # size
+        r' (?P<status>\d*)'  # status
+        r' (?P<size>\d*)$'  # size
     )
 
     data = pattern.match(line).groupdict()
-    host = data["host"]
-    authuser = data["authuser"]
-    request_method = data["request_method"]
-    path = data["path"]
-    status = data["status"]
-    size = data["size"]
+    host = data['host']
+    authuser = data['authuser']
+    request_method = data['request_method']
+    path = data['path']
+    status = data['status']
+    size = data['size']
 
     # split section path
-    path_components = os.path.normpath(path).split("/")
-    section = "/"
+    path_components = os.path.normpath(path).split('/')
+    section = '/'
     if path_components[1]:
         section = section + path_components[1]
 
     # update dict counter
-    entry = [("section", section), ("host", host), ("authuser", authuser),
-             ("request_method", request_method), ("status", status)]
+    entry = [('section', section), ('host', host), ('authuser', authuser),
+             ('request_method', request_method), ('status', status)]
     for key, value in entry:
-        if not key in stats_data:
+        if key not in stats_data:
             stats_data[key] = Counter()
         stats_data[key].update([value])
     # bytes size
     key = 'size'
-    if not key in stats_data:
+    if key not in stats_data:
         stats_data[key] = Counter()
     stats_data[key].update({key: int(size)})
 
@@ -141,7 +142,6 @@ def main(filename, stats_interval, threshold, alarm_interval):
     alarm_total_req_count = 0
     alert_sent = False
     stats_data = {}
-    now = time.time()
 
     # open the file for reading
     try:
@@ -194,8 +194,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     try:
-        print("Starting {progname} reading log file {filename}".format(
+        print('Starting {progname} reading log file {filename}'.format(
             progname=__file__, filename=args.filename))
         main(args.filename, args.stats, args.threshold, args.alarm)
     except KeyboardInterrupt:
-        print("{progname} stopped".format(progname=__file__))
+        print('{progname} stopped'.format(progname=__file__))
