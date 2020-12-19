@@ -144,41 +144,53 @@ def main(filename, stats_interval, threshold, alarm_interval):
     alert_sent = False
     stats_data = {}
 
-    # open the file for reading
-    try:
-        file = open(filename, 'r')
-    except IOError:
-        print('Unable to open {filename} for reading'.format(
-            filename=filename))
-        sys.exit(1)
-    # shift at the end of file
-    file.seek(0, os.SEEK_END)
-
+    seek_end = True
     while True:
-        now = time.time()
-        pos = file.tell()
-        line = file.readline()
-        if line:
-            stats_data = parse_clf_http_line(line, stats_data)
-            total_req_count += 1
-        else:
-            file.seek(pos)
-            time.sleep(1)
-            stats_timer += 1
-            alarm_timer += 1
+        try:  # open the file for reading
+            with open(filename, 'r') as file:
+                if seek_end:  # reopened files must not seek end
+                    file.seek(0, os.SEEK_END)  # shift at the end of file
+                while True:  # line reading loop
+                    now = time.time()
+                    line = file.readline()
+                    if line:
+                        stats_data = parse_clf_http_line(line, stats_data)
+                        total_req_count += 1
+                    else:
+                        try:
+                            if file.tell() > os.path.getsize(filename):  # rotation occurred (copytruncate/create)
+                                file.close()
+                                seek_end = False
+                                break
+                            pos = file.tell()
+                            file.seek(pos)
+                            time.sleep(1)
+                            stats_timer += 1
+                            alarm_timer += 1
 
-            if stats_timer == stats_interval:
-                display_summary_stats(now, stats_interval, stats_data)
-                alarm_total_req_count += total_req_count
-                stats_data = {}
-                total_req_count = 0
-                stats_timer = 0
+                            if stats_timer == stats_interval:
+                                display_summary_stats(
+                                    now, stats_interval, stats_data)
+                                alarm_total_req_count += total_req_count
+                                stats_data = {}
+                                total_req_count = 0
+                                stats_timer = 0
 
-            if alarm_timer == alarm_interval:
-                alert_sent = alarm_threshold(
-                    now, alarm_total_req_count, alarm_interval, threshold, alert_sent)
-                alarm_total_req_count = 0
-                alarm_timer = 0
+                            if alarm_timer == alarm_interval:
+                                alert_sent = alarm_threshold(
+                                    now, alarm_total_req_count, alarm_interval, threshold, alert_sent)
+                                alarm_total_req_count = 0
+                                alarm_timer = 0
+
+                        except FileNotFoundError:  # rotation occurred but new file still not created
+                            print('{filename} is still not ready for reading'.format(
+                                filename=filename))
+                            time.sleep(1)
+
+        except IOError:
+            print('Unable to open {filename} for reading'.format(
+                filename=filename))
+            sys.exit(1)
 
 
 if __name__ == '__main__':
