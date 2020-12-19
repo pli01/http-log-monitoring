@@ -85,7 +85,6 @@ def display_time(timestamp):
 
 
 def parse_clf_http_line(line, stats_data):
-                    # shift at the end of file
     """
     Parse line in the common log format (https://en.wikipedia.org/wiki/Common_Log_Format)
     example:
@@ -147,10 +146,10 @@ def main(filename, stats_interval, threshold, alarm_interval):
 
     seek_end = True
     while True:
-        try: # open the file for reading
+        try:  # open the file for reading
             with open(filename, 'r') as file:
                 if seek_end:  # reopened files must not seek end
-                    file.seek(0, os.SEEK_END) # shift at the end of file
+                    file.seek(0, os.SEEK_END)  # shift at the end of file
                 while True:  # line reading loop
                     now = time.time()
                     line = file.readline()
@@ -159,7 +158,7 @@ def main(filename, stats_interval, threshold, alarm_interval):
                         total_req_count += 1
                     else:
                         try:
-                            if file.tell() > os.path.getsize(filename): # rotation occurred (copytruncate/create)
+                            if file.tell() > os.path.getsize(filename):  # rotation occurred (copytruncate/create)
                                 file.close()
                                 seek_end = False
                                 break
@@ -170,7 +169,8 @@ def main(filename, stats_interval, threshold, alarm_interval):
                             alarm_timer += 1
 
                             if stats_timer == stats_interval:
-                                display_summary_stats(now, stats_interval, stats_data)
+                                display_summary_stats(
+                                    now, stats_interval, stats_data)
                                 alarm_total_req_count += total_req_count
                                 stats_data = {}
                                 total_req_count = 0
@@ -182,17 +182,16 @@ def main(filename, stats_interval, threshold, alarm_interval):
                                 alarm_total_req_count = 0
                                 alarm_timer = 0
 
-                        except FileNotFoundError: # rotation occurred but new file still not created
-                           print('{filename} is still not ready for reading'.format(
-                               filename=filename))
-                           seek_end = False
-                           time.sleep(1)
-                           pass  # wait 1 second and retry
+                        except FileNotFoundError:  # rotation occurred but new file still not created
+                            print('{filename} is still not ready for reading'.format(
+                                filename=filename))
+                            time.sleep(1)
 
         except IOError:
             print('Unable to open {filename} for reading'.format(
                 filename=filename))
             sys.exit(1)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
