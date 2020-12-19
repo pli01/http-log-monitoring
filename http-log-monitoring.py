@@ -43,27 +43,28 @@ def display_summary_stats(now, stats_interval, stats_data):
     total_req_count = 0
     size_bytes = 0
     summary = ''
+    top = 3
     if len(stats_data) > 0:
         count = []
         summary = '\n'
         total_req_count = sum(Counter(stats_data['section']).values())
         size_bytes = sum(Counter(stats_data['size'].values()))
 
-        for element in Counter(stats_data['section']).most_common(3):
+        for element in Counter(stats_data['section']).most_common(top):
             count.append('{key} = {count}'.format(
                 key=element[0], count=element[1]))
         number = len(Counter(stats_data['section']))
-        summary += '  total "sections" of the web site = {number} , most hits: {count}'.format(
-            number=number, count=', '.join(count))
+        summary += '  Top {top} of total {number} web site "sections", most common : {count}'.format(
+            top=top, number=number, count=', '.join(count))
 
         for field in ['host', 'authuser', 'status', 'request_method']:
             count = []
             summary += '\n'
-            for element in Counter(stats_data[field]).most_common(3):
+            for element in Counter(stats_data[field]).most_common(top):
                 count.append('"{key}" = {count}'.format(
                     key=element[0], count=element[1]))
             number = len(Counter(stats_data[field]))
-            summary += '  most common of {number} "{title}" : {count}'.format(
+            summary += '  Most common of {number} "{title}" : {count}'.format(
                 title=field, number=number, count=', '.join(count))
 
     average = r_average(total_req_count, stats_interval)

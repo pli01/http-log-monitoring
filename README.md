@@ -40,6 +40,37 @@ optional arguments:
                         alarm interval in second (default: 180)
 ```
 
+## Sample output
+
+* Sample stats with no traffic
+```
+2020-12-19 17:42:30 Summary stats last 10 seconds:hits = 0 - average = 0.0/s - size = 0 bytes
+```
+* Sample Stats with traffic
+```
+2020-12-19 17:42:40 Summary stats last 10 seconds:hits = 60 - average = 6.0/s - size = 210402 bytes
+  Top 3 of total 3 web site "sections", most common : /api = 21, / = 21, /report = 18
+  Most common of 3 "host" : "10.1.1.1" = 23, "192.168.1.1" = 22, "127.0.0.1" = 15
+  Most common of 4 "authuser" : "mary" = 18, "james" = 17, "frank" = 13
+  Most common of 4 "status" : "503" = 18, "302" = 16, "200" = 15
+  Most common of 3 "request_method" : "GET" = 22, "POST" = 21, "PUT" = 17
+```
+* Stats and Alert with exceeded threshold
+```
+2020-12-19 17:43:00 Summary stats last 10 seconds:hits = 200 - average = 20.0/s - size = 714214 bytes
+  Top 3 of total 3 web site "sections", most common : /api = 71, / = 66, /report = 63
+  Most common of 3 "host" : "127.0.0.1" = 68, "192.168.1.1" = 67, "10.1.1.1" = 65
+  Most common of 4 "authuser" : "frank" = 58, "james" = 57, "mary" = 47
+  Most common of 4 "status" : "302" = 65, "404" = 54, "200" = 47
+  Most common of 3 "request_method" : "PUT" = 74, "POST" = 65, "GET" = 61
+High traffic generated an alert - hits = 13.0, triggered at 2020-12-19 17:43:00
+```
+* Stats and Alert whenever the total traffic drops again below the threshold
+```
+2020-12-19 17:43:40 Summary stats last 10 seconds:hits = 0 - average = 0.0/s - size = 0 bytes
+Traffic back to normal - hits = 6.0, recovered at 2020-12-19 17:43:30
+2020-12-19 17:43:40 Summary stats last 10 seconds:hits = 0 - average = 0.0/s - size = 0 bytes
+```
 ## Test it
 [![Build status](https://github.com/pli01/http-log-monitoring/workflows/CI/badge.svg)](https://github.com/pli01/http-log-monitoring)
 
@@ -50,11 +81,14 @@ make test
 ```
 
 Test logic is the following:
-Start the log generator to send X req during 20s in logfile, start the http-monitoring-tool and detect the following cases in output
-- Detect "Summary stats last 10 seconds"
-- Detect "total "sections" of the web site"
-- Detect "High traffic generated an alert"
-- Detect "Traffic back to normal"
+* log generator to send 20 req/s during 20s in logfile is started
+* the http-monitoring-tool is started
+* Find detect the following cases in output of http-monitoring-tools
+  - Detect "Summary stats last 10 seconds"
+  - Detect "total "sections" of the web site"
+  - Detect "High traffic generated an alert"
+  - Detect "Traffic back to normal"
+
 Test script is defined in `tests` directory.
 
 ## Development environment
@@ -73,6 +107,11 @@ make docker-run-test
 - You can "curl 127.0.0.1" or use any benchmark tool (ab,hey,locust) to send requests on http://127.0.0.1 and see the result in docker container logs output
 ```
 make docker-stack-run
-#
+# test it with ab
 ab -n 10 -t 1 http://127.0.0.1
 ```
+
+# Design and improvment
+
+[DESIGN](DESIGN.md)
+
