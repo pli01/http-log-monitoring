@@ -1,5 +1,5 @@
 format:
-	autopep8 -d  --exit-code *.py || autopep8 -i  --exit-code *.py
+	autopep8 -d  --exit-code *.py || autopep8 -i *.py
 test:
 	( cd tests && bash run-tests.sh )
 docker-build:

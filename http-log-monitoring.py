@@ -92,7 +92,7 @@ def parse_clf_http_line(line, stats_data):
     use Regex to split in
 
     Returns:
-       Generate a dictionary from the CLF log line
+       Generate a dictionary from the CLF log entry
     """
     pattern = re.compile(
         r'^(?P<host>\S*)'  # host
@@ -107,31 +107,29 @@ def parse_clf_http_line(line, stats_data):
     )
 
     data = pattern.match(line).groupdict()
-    host = data['host']
-    authuser = data['authuser']
-    request_method = data['request_method']
-    path = data['path']
-    status = data['status']
-    size = data['size']
 
     # split section path
-    path_components = os.path.normpath(path).split('/')
+    path_components = os.path.normpath(data['path']).split('/')
     section = '/'
     if path_components[1]:
         section = section + path_components[1]
 
-    # update dict counter
-    entry = [('section', section), ('host', host), ('authuser', authuser),
-             ('request_method', request_method), ('status', status)]
+    # update entry in dict counter
+    entry = [
+        ('section', section),
+        ('host', data['host']),
+        ('authuser', data['authuser']),
+        ('request_method', data['request_method']),
+        ('status', data['status']),
+        ('size', data['size'])
+    ]
     for key, value in entry:
         if key not in stats_data:
             stats_data[key] = Counter()
-        stats_data[key].update([value])
-    # bytes size
-    key = 'size'
-    if key not in stats_data:
-        stats_data[key] = Counter()
-    stats_data[key].update({key: int(size)})
+        if key is 'size':  # increment total bytes size
+            stats_data[key].update({key: int(data['size'])})
+        else:
+            stats_data[key].update([value])
 
     return stats_data
 
