@@ -1,12 +1,12 @@
-# key points
+# key points of current versoin
 * sample logs test files in CLF format
 * param: logfile and threshold default value and overridable (args)
-* read log file continously (like tail)
-* line parser http log : with structured data: host, ident, and special on url path call section -> use Counter
-* trigger stats : 10s, hits / section + whole traffic summary
-* trigger alarm : 120s , if req > threshold(10/s) and not alert,  send_alert, if not alert and req < threshold , send_alert recovered
-* testing prog to simulate alerting
+* read log file continously (like unix tail)
 * First quick implementation with simple tail loop with 1s sleep interval (bloking io)
+* line parser http log : with structured data (nested dict of counter): host, authuser, status, request_method,  and special url path call section
+* trigger and display stats : default 10s, hits / section + whole traffic summary
+* trigger and display alarm : default 120s , if req > threshold(10/s) and not alert,  send_alert, if not alert and req < threshold , send_alert recovered
+* testing prog to simulate alerting
 
 data structure to store 10s of traffic information as counters
 {

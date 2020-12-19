@@ -71,7 +71,7 @@ test_match='Summary stats last 10 seconds'
 run_test "1" "$test_match" "$test_output" 
 
 # test 2
-test_match='total "sections" of the web site'
+test_match='web site "sections", most common'
 run_test "2" "$test_match" "$test_output" 
 
 # test 3
