@@ -1,7 +1,7 @@
 # key points of current versoin
 * sample logs test files in CLF format
 * param: logfile and threshold default value and overridable (args)
-* read log file continously (like unix tail)
+* read log file continously (like unix tail) and follow rotating logfile
 * First quick implementation with simple tail loop with 1s sleep interval (bloking io)
 * line parser http log : with structured data (nested dict of counter): host, authuser, status, request_method,  and special url path call section
 * trigger and display stats : default 10s, hits / section + whole traffic summary
@@ -24,7 +24,6 @@ data structure to store 10s of traffic information as counters
 * catch regex error if logfile in not in CLF format 
 * Add try/catch error cleanly
 * logging and formating function or sending status into a remote collector in a json format
-* follow rotating logfile
 * Use non blocking IO, poll, event modification and stream, Loop based on event modification (select, poll)
 * Time series: circular queue per second: 1s -> 10s -> 120s (2mn) to store timestamp, and data to enhanced statistics
 * multi thread and queue
