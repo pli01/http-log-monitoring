@@ -1,5 +1,9 @@
 #!/bin/bash
+#
+# Script to test the alerting logic
+#
 #set -x
+
 function clean() {
     ret=$?
     echo "# clean"
@@ -42,14 +46,14 @@ trap clean EXIT KILL
 # allows for log messages to be immediately dumped
 export PYTHONUNBUFFERED=1
 
-dirname=$(dirname $0)
+dirname="$(dirname $0)"
 bindir=..
 timestamp="$(date "+%Y-%m-%d-%H:%M:%S")"
 
 generate_logs="generate-logs.py"
 http_log_monitoring="http-log-monitoring.py"
-logfile="${dirname}/access_log_generated_${timestamp}.log"
-test_output="${dirname}/test_output_${timestamp}.log"
+logfile="access_log_generated_${timestamp}.log"
+test_output="test_output_${timestamp}.log"
 
 # setup test
 echo "# setup test"
@@ -57,13 +61,19 @@ threshold=20
 duration=20
 alert_time=30
 
+cd "$dirname"
+
+# clean old test log if exists
+[ -f "$logfile" ] && rm -rf "$logfile"
+
 echo "# starting $generate_logs: $threshold req/s during $duration"
-> $logfile
 ${bindir}/$generate_logs -f $logfile -t $threshold -d $duration 2>&1 >&- &
 generate_pid=$!
 
+sleep 1
+
 echo "# starting $http_log_monitoring -f $logfile (override alarm time detection to $alert_time seconds)"
-${bindir}/$http_log_monitoring -f $logfile -a $alert_time  2>&1 >$test_output &
+${bindir}/$http_log_monitoring -f $logfile -a $alert_time 2>&1 >$test_output &
 monitoring_pid=$!
 
 # test 1
