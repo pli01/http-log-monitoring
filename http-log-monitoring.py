@@ -107,30 +107,33 @@ def parse_clf_http_line(line, stats_data):
         r' (?P<size>\d*)$'  # size
     )
 
-    data = pattern.match(line).groupdict()
+    try:
+        data = pattern.match(line).groupdict()
 
-    # split section path
-    path_components = os.path.normpath(data['path']).split('/')
-    section = '/'
-    if path_components[1]:
-        section = section + path_components[1]
+        # split section path
+        path_components = os.path.normpath(data['path']).split('/')
+        section = '/'
+        if path_components[1]:
+            section = section + path_components[1]
 
-    # update entry in dict counter
-    entry = [
-        ('section', section),
-        ('host', data['host']),
-        ('authuser', data['authuser']),
-        ('request_method', data['request_method']),
-        ('status', data['status']),
-        ('size', data['size'])
-    ]
-    for key, value in entry:
-        if key not in stats_data:
-            stats_data[key] = Counter()
-        if key == 'size':  # increment total bytes size
-            stats_data[key].update({key: int(data['size'])})
-        else:
-            stats_data[key].update([value])
+        # update entry in dict counter
+        entry = [
+            ('section', section),
+            ('host', data['host']),
+            ('authuser', data['authuser']),
+            ('request_method', data['request_method']),
+            ('status', data['status']),
+            ('size', data['size'])
+        ]
+        for key, value in entry:
+            if key not in stats_data:
+                stats_data[key] = Counter()
+            if key == 'size':  # increment total bytes size
+                stats_data[key].update({key: int(data['size'])})
+            else:
+                stats_data[key].update([value])
+    except:  # skip log line if not in CLF format
+        pass
 
     return stats_data
 
