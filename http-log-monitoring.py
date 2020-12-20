@@ -132,7 +132,7 @@ def parse_clf_http_line(line, stats_data):
                 stats_data[key].update({key: int(data['size'])})
             else:
                 stats_data[key].update([value])
-    except:  # skip log line if not in CLF format
+    except AttributeError:  # skip log line if not in CLF format
         pass
 
     return stats_data
