@@ -22,18 +22,9 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${http_proxy}
         no_proxy: ${no_proxy}
-#     entrypoint: [ "/bin/bash","-c","/app/http-log-monitoring.py -f /logs/host.access.log -a 30" ]
-#    entrypoint: [ "sleep", "100" ]
     restart: always
     volumes:
       - log-volume:/logs
-#      - ./http-log-monitoring.py:/app/http-log-monitoring.py
-#      - ./generate-logs.py:/app/generate-logs.py
-#      - notused:/app/modules
-#    env_file:
-#      - ${cnf:-.env}
-#    networks:
-#      - log-network
 
 networks:
   log-network:
