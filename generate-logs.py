@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-   Write into "filename", "threshold" random log lines per second during "duration" second
+   Script to generate random logs for testing purpose
+     Write into "filename", "threshold" random log lines per second during "duration" second
 """
 import argparse
 import random
@@ -12,13 +13,15 @@ from datetime import datetime, timedelta
 def generate_log_line():
     """
     Return one random log string in CLF format
+       hosts, methods, status_code, resources can be adjusted
     """
 
+    # sample random entry
     hosts = ['127.0.0.1', '10.1.1.1', '192.168.1.1']
     users = ['james', 'jill', 'frank', 'mary']
     resources = ['/report', '/api/user', '/']
-    methods = ['GET', 'POST', 'PUT']
-    status_code = [200, 503, 302, 404]
+    methods = ['GET', 'POST', 'PUT', 'PATCH', 'HEAD', 'DELETE']
+    status_code = [200, 201, 301, 302, 400, 404, 503]
 
     otime = datetime(2020, 12, 12)
 

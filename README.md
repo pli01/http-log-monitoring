@@ -76,7 +76,7 @@ Traffic back to normal - hits = 6.0, recovered at 2020-12-19 17:43:30
 
 Tested on Linux and OS/X
 * in a shell, in the current directory, make test
-```
+```bash
 make test
 ```
 
@@ -93,11 +93,11 @@ Test script is defined in `tests` directory.
 
 ## Development environment
 * (optional) A docker test stack is also provided, to launch the test in docker with docker-compose with python:3 image at docker build time
-```
+```bash
 make docker-build
 ```
-* (optionnal) Or to launch the test in docker with docker-compose with python:3 image at docker run time with a previous image built
-```
+* (optional) Or to launch the test in docker with docker-compose with python:3 image at docker run time with a previous image built
+```bash
 make docker-run-test
 ```
 
@@ -105,7 +105,7 @@ make docker-run-test
 - One `web` nginx container listen on 80 port and send logs in CLF format into a shared volume /logs/hosts.access.log
 - One `http-log-monitoring` container is started and monitor the log file  /logs/hosts.access.log
 - You can "curl 127.0.0.1" or use any benchmark tool (ab,hey,locust) to send requests on http://127.0.0.1 and see the result in docker container logs output
-```
+```bash
 make docker-stack-run
 # test it with ab
 ab -n 10 -t 1 http://127.0.0.1

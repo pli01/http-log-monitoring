@@ -1,8 +1,8 @@
-# key points of current versoin
+# key points of current version
 * sample logs test files in CLF format
 * param: logfile and threshold default value and overridable (args)
-* read log file continously (like unix tail) and follow rotating logfile
-* First quick implementation with simple tail loop with 1s sleep interval (bloking io)
+* read log file continuously (like unix tail) and follow rotating logfile
+* First quick implementation with simple tail loop with 1s sleep interval (blocking io)
 * line parser http log : with structured data (nested dict of counter): host, authuser, status, request_method,  and special url path call section
 * trigger and display stats : default 10s, hits / section + whole traffic summary
 * trigger and display alarm : default 120s , if req > threshold(10/s) and not alert,  send_alert, if not alert and req < threshold , send_alert recovered
@@ -23,11 +23,11 @@ data structure to store 10s of traffic information as counters
 * use config file, or env parameters
 * catch regex error if logfile in not in CLF format 
 * Add try/catch error cleanly
-* logging and formating function or sending status into a remote collector in a json format
+* logging and formatting function or sending status into a remote collector in a json format
 * Use non blocking IO, poll, event modification and stream, Loop based on event modification (select, poll)
 * Time series: circular queue per second: 1s -> 10s -> 120s (2mn) to store timestamp, and data to enhanced statistics
 * multi thread and queue
-  * 1 thread : continuously read access log file and store strutured data in queue
+  * 1 thread : continuously read access log file and store structured data in queue
   * 1 thread stats
   * 1 thread alerting average
 * Event-Driven Programming (asyncio, event)
