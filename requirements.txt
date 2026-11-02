@@ -1,2 +1,2 @@
 autopep8==1.5.4
-pylint==2.6.0
+pylint==4.0.9
